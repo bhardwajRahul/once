@@ -230,9 +230,7 @@ func (a *Application) populateVolume(ctx context.Context, vol *ApplicationVolume
 
 	resp, err := a.namespace.client.ContainerCreate(ctx,
 		&container.Config{
-			Image:      a.Settings.Image,
-			Entrypoint: []string{},
-			Cmd:        []string{"sleep", "infinity"},
+			Image: a.Settings.Image,
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
@@ -256,10 +254,6 @@ func (a *Application) populateVolume(ctx context.Context, vol *ApplicationVolume
 		defer cancel()
 		a.namespace.client.ContainerRemove(removeCtx, resp.ID, container.RemoveOptions{Force: true})
 	}()
-
-	if err := a.namespace.client.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
-		return fmt.Errorf("starting temp container: %w", err)
-	}
 
 	if len(data) > 0 {
 		if err := a.namespace.client.CopyToContainer(ctx, resp.ID, "/", bytes.NewReader(data), container.CopyToContainerOptions{}); err != nil {
